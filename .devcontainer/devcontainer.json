@@ -4,18 +4,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-dotnettools.csdevkit",
-                "ms-dotnettools.csharp",
-                "ms-dotnettools.vscode-dotnet-runtime"
+                "ms-dotnettools.csdevkit"
             ]
         }
-    },
-    "features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {
-            "installZsh": true,
-            "configureZshAsDefaultShell": true,
-            "makeReadonly": false
-        }
-    },
-    "remoteUser": "vscode"
+    }
 }
