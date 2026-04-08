@@ -90,7 +90,6 @@ VSCode에서 C# 개발을 시작할 때 필요한 확장 프로그램과 설치 
 ```json
 {
     "name": "C#/.NET Environment",
-    "image": "mcr.microsoft.com/devcontainers/dotnet:8.0",
     "customizations": {
         "vscode": {
             "extensions": [
