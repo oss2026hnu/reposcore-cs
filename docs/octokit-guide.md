@@ -2,7 +2,7 @@
 
 [Octockit 라이브러리 공식 홈페이지](https://github.com/octokit)
 
-> 이 문서는 C# 환경에서 GitHub API를 사용하기 위한 라이브러리인 Octokit.NET의 기본 사용법을 설명합니다.
+> C# 환경에서 GitHub API를 사용하기 위한 라이브러리인 Octokit.NET의 기본 사용법입니다.
 > 저장소 이슈 조회, Pull Request 조회 등 GitHub 정보 연동 기능 구현 전에 기본 구조를 이해하는 데 목적이 있습니다.
 
 ## 1. Octokit.NET 설치 방법
@@ -141,3 +141,149 @@ Console.WriteLine(rateLimits.Resources.Core.Remaining);
 | PR 조회 | `PullRequest.GetAllForRepository()` |
 | 인증 설정 | `Credentials()`                     |
 
+---  
+
+# GraphQL API 활용 가이드
+
+[GraphQL 공식 홈페이지](https://graphql.org/)  
+[GitHub GraphQL API 문서](https://docs.github.com/en/graphql)  
+[GraphQL 기초 튜토리얼 홈페이지](https://graphql.org/learn/?utm_source=chatgpt.com)  
+
+> GitHub 저장소 이슈, Pull Request 정보 조회를 위한 GraphQL 사용법입니다.
+
+---
+
+## 1. GraphQL API 사용 준비
+
+GitHub GraphQL API는 하나의 엔드포인트를 사용합니다.
+
+### Endpoint
+
+```bash
+https://api.github.com/graphql
+```
+
+---
+
+## 2. 인증 설정 (Personal Access Token)
+
+GraphQL API는 대부분의 경우 인증이 필요합니다.
+
+### 토큰 생성
+
+GitHub 에서 생성
+
+* Settings → Developer settings → Personal access tokens
+* 필요한 권한:
+
+  * public 저장소 → `public_repo`
+  * private 저장소 → `repo`
+
+---
+
+### 요청 헤더 설정  
+
+```http
+Authorization: Bearer YOUR_TOKEN
+```
+---
+
+## 3. 기본 요청 구조
+
+GraphQL 요청은 JSON 형태로 전송됩니다.
+
+```json
+{
+  "query": "여기에 GraphQL 쿼리 작성"
+}
+```
+
+---
+
+## 4. C#에서 GraphQL 요청 보내기
+
+Octokit은 REST API 기반이므로 GraphQL은 `HttpClient`를 사용합니다.
+
+### 기본 예시
+
+```csharp
+using System.Net.Http;
+using System.Text;
+
+var client = new HttpClient();
+client.DefaultRequestHeaders.Add("Authorization", "Bearer YOUR_TOKEN");
+
+var query = @"{
+  viewer {
+    login
+  }
+}";
+
+var content = new StringContent(
+    $"{{\"query\":\"{query}\"}}",
+    Encoding.UTF8,
+    "application/json"
+);
+
+var response = await client.PostAsync("https://api.github.com/graphql", content);
+var result = await response.Content.ReadAsStringAsync();
+
+Console.WriteLine(result);
+```
+
+---
+
+## 5. 저장소 이슈 조회 예시
+
+```csharp
+var query = @"{
+  repository(owner: ""owner"", name: ""repo-name"") {
+    issues(first: 5) {
+      nodes {
+        number
+        title
+      }
+    }
+  }
+}";
+```
+
+---
+
+## 6. Pull Request 조회 예시
+
+```csharp
+var query = @"{
+  repository(owner: ""owner"", name: ""repo-name"") {
+    pullRequests(first: 5) {
+      nodes {
+        number
+        title
+      }
+    }
+  }
+}";
+```
+
+---
+
+## 7. 참고 (테스트 및 학습)
+
+GraphQL 쿼리는 아래 도구에서 쉽게 테스트할 수 있습니다.
+
+* GraphiQL
+* Altair GraphQL Client
+* Insomnia
+
+---
+
+## 정리
+
+| 기능       | 설명                               |
+| -------- | -------------------------------- |
+| Endpoint | `https://api.github.com/graphql` |
+| 인증       | `Bearer Token`                   |
+| 요청 방식    | POST + JSON                      |
+| 주요 사용 방법 | HttpClient로 직접 요청                |
+
+---
