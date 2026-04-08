@@ -233,7 +233,10 @@ Console.WriteLine(result);
 
 ---
 
-## 5. 저장소 이슈 조회 예시
+## 5. 저장소 이슈 조회 예시  
+
+* `"owner"` : GitHub 사용자 또는 조직 이름
+* `"repo-name"` : 저장소 이름
 
 ```csharp
 var query = @"{
