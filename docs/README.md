@@ -3,16 +3,15 @@
 ### 문서 목록
 
 <!-- DOC_LIST_START -->
-- [README-TEMPLATE.md](./README-TEMPLATE.md): README-TEMPLATE
 - [cli-lib-guide.md](./cli-lib-guide.md): C# CLI 프로그램 개발을 위한 추천 라이브러리
 - [csharp-convention.md](./csharp-convention.md): C# 코딩 컨벤션 가이드
-- [docker-guide.md](./docker-guide.md): Docker 설치 및 구동 가이드(WSL2 Ubuntu 기준)
+- [docker-guide.md](./docker-guide.md): Docker 설치 및 구동 가이드
 - [dotnet-guide.md](./dotnet-guide.md): C# 개발을 위한 .NET 설치 및 프로젝트 구성 가이드
 - [git-guide.md](./git-guide.md): git 기초
 - [issue-guide.md](./issue-guide.md): 이슈 작업 선점 관련 규정 가이드
-- [octokit-guide.md](./octokit-guide.md): Octokit.NET 활용 가이드
+- [octokit-graphql-guide.md](./octokit-graphql-guide.md): Octokit.NET 과 GraphQL 활용 가이드
 - [score-guide.md](./score-guide.md): 오픈소스 기여 점수 산정 가이드
-- [vscode-extensions.md](./vscode-extensions.md): C# 개발을 위한 VSCode 확장 가이드 (Codespaces)
+- [vscode-extensions.md](./vscode-extensions.md): C# 개발을 위한 VSCode 확장 가이드
 <!-- DOC_LIST_END -->
 ---
 > ⚠️ **문서 목록은 수작업으로 갱신하지 마세요.**
