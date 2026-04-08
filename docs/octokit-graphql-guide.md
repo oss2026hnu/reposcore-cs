@@ -1,4 +1,6 @@
-# Octokit.NET 활용 가이드
+# Octokit.NET 과 GraphQL 활용 가이드  
+
+## Octokit.NET 활용 가이드
 
 [Octockit 라이브러리 공식 홈페이지](https://github.com/octokit)
 
@@ -143,7 +145,7 @@ Console.WriteLine(rateLimits.Resources.Core.Remaining);
 
 ---  
 
-# GraphQL API 활용 가이드
+## GraphQL API 활용 가이드
 
 [GraphQL 공식 홈페이지](https://graphql.org/)  
 [GitHub GraphQL API 문서](https://docs.github.com/en/graphql)  
