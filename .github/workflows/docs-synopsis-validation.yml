@@ -1,0 +1,45 @@
+name: Docs Synopsis Validation
+
+on:
+  pull_request:
+    paths:
+      - "tools/update-synopsis.py"
+      - "tools/j2render.py"
+      - "Program.cs"
+      - "reposcore-cs.csproj"
+      - "Makefile"
+      - "README-template.md.j2"
+
+jobs:
+  verify-docs-synopsis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install jinja2
+        run: pip install jinja2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Run full README generation
+        env:
+          LANG: ko_KR.UTF-8
+          LC_ALL: ko_KR.UTF-8
+        run: make
+
+      - name: Verify README.md synopsis is up to date
+        run: |
+          if ! git diff --exit-code -- README.md; then
+            echo "::error::README.md synopsis is out of sync. Please run 'make' locally and commit the changes."
+            exit 1
+          fi

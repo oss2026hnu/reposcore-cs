@@ -61,3 +61,4 @@ nunit-*.xml
 
 # Result
 results/
+vars/

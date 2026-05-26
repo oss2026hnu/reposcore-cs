@@ -1,5 +1,14 @@
 # GitHub Personal Access Token 가이드
 
+## Codespaces 환경에서의 토큰 사용
+
+💡 **Codespaces 환경에서는 별도의 개인 액세스 토큰(PAT) 발급 및 입력이 필요하지 않습니다.**
+
+* **이유:** Codespaces는 GitHub 계정과 연동되어 실행되는 클라우드 개발 환경이므로, 실행 시 내부에 이미 인증 권한을 가진 `GITHUB_TOKEN` 환경 변수가 자동으로 할당되어 있기 때문입니다.
+* 따라서 Codespaces 내 터미널에서는 아래의 발급 과정을 생략하고 `--token` 옵션 없이 명령어만 실행해도 정상적으로 API 조회가 가능합니다.
+
+---
+
 ## Personal Access Token 발급 방법
  
 1. GitHub 우측 상단 프로필 클릭 → `Settings`

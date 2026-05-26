@@ -56,6 +56,8 @@ git pull origin main
 
 ---
 
+#### 방법 B — 터미널만 사용 
+
 **Step 1. upstream 등록 확인**
 
 > ℹ️ **Codespaces에서는 `upstream`이 자동으로 등록됩니다.** (`git remote add upstream ...`은 Codespaces에서 필요 없음.)

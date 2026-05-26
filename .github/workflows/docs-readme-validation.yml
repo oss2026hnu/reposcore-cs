@@ -1,0 +1,38 @@
+name: Docs README Validation
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "tools/update-doclist.py"
+      - "tools/j2render.py"
+      - "Makefile"
+
+jobs:
+  verify-docs-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install jinja2
+        run: pip install jinja2
+
+      - name: Run docs README generation
+        env:
+          LANG: ko_KR.UTF-8
+          LC_ALL: ko_KR.UTF-8
+        run: make docs
+
+      - name: Verify docs/README.md is up to date
+        run: |
+          if ! git diff --exit-code -- docs/README.md; then
+            echo "::error::docs/README.md is out of sync. Please run 'make docs' locally and commit the changes."
+            exit 1
+          fi

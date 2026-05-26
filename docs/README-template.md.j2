@@ -3,24 +3,16 @@
 ### 문서 목록
 
 <!-- DOC_LIST_START -->
-
-- [cocona-guide.md](./cocona-guide.md): Cocona 라이브러리 가이드
-- [csharp-convention.md](./csharp-convention.md): C# 코딩 컨벤션 가이드
-- [docker-guide.md](./docker-guide.md): Docker 설치 및 구동 가이드
-- [dotnet-guide.md](./dotnet-guide.md): C# 개발을 위한 .NET 설치 및 프로젝트 구성 가이드
-- [git-guide.md](./git-guide.md): git 기초
-- [github-token-guide.md](./github-token-guide.md): GitHub Personal Access Token 가이드
-- [issue-pr-guide.md](./issue-pr-guide.md): 이슈 작업 선점 관련 규정 가이드
-- [octokit-guide.md](./octokit-guide.md): Octokit.NET 활용 가이드
-- [score-guide.md](./score-guide.md): 오픈소스 기여 점수 산정 가이드
-- [vscode-extensions.md](./vscode-extensions.md): C# 개발을 위한 VSCode 확장 가이드
+{% for doc in docs %}
+- [{{ doc.filename }}](./{{ doc.filename }}): {{ doc.title }}
+{%- endfor %}
 <!-- DOC_LIST_END -->
 
 ---
 
 > ⚠️**아래 상황이 발생하면 반드시 스크립트를 통해 목록을 자동 갱신해줘야 합니다.**
 >
-> - docs/README.md 파일을 업데이트하기 위해 templates/README-template.md 파일을 수정한 경우
+> - docs/README.md 파일을 업데이트하기 위해 docs/README-template.md.j2 파일을 수정한 경우
 > - docs/\*.md 경로에 새로운 문서를 생성한 경우
 > - 기존 문서를 삭제한 경우
 > - 파일 이름을 변경하거나, 문서 내부의 최상위 제목(# 제목)을 수정한 경우
@@ -32,18 +24,14 @@
 > ```
 >
 > ```bash
-> python tools/update-readme.py
+> python tools/update-doclist.py
+> python tools/j2render.py docs/README-template.md.j2 vars/doclist.json -o docs/README.md
 > ```
 >
-> 스크립트 위치: `tools/update-readme.py`
+> 스크립트 위치: `tools/update-doclist.py`, `tools/j2render.py`
 >
-> ```
-> 참고사항: 실행 명령어는 현재 작업중인 디렉터리에 따라 유동적으로 변동될 수 있음.
-> 예시) Root가 아닌 docs/에 위치할 시, python tools/update-readme.py 명령어 사용 시 작동
-> ```
->
-> ⚠️ **수작업으로 문서 목록 갱신하지 마세요.**.  
-> ⚠️ **docs/READEME.md 파일을 직접 수정하지 마세요.**
+> ⚠️ **수작업으로 문서 목록 갱신하지 마세요.**
+> ⚠️ **docs/README.md 파일을 직접 수정하지 마세요.**
 
 ---
 
@@ -51,32 +39,38 @@
 
 > ⚠️ `docs/README.md`를 직접 수정하지 마세요.
 
-`docs/README.md`를 수정하려면 먼저 `docs/templates/README-template.md`를 업데이트한 후, 루트 디렉터리에서 `python tools/update-readme.py`를 실행하여 `docs/README.md`를 자동으로 갱신하세요.
+`docs/README.md`를 수정하려면 먼저 `docs/README-template.md.j2`를 업데이트한 후, 루트 디렉터리에서 아래 명령어를 실행하여 `docs/README.md`를 자동으로 갱신하세요.
 
 ### 수정 방법
 
-1. `docs/templates/README-template.md`를 업데이트합니다.
-2. 루트 디렉터리에서 `python tools/update-readme.py`를 실행합니다.
+1. `docs/README-template.md.j2`를 업데이트합니다.
+2. 루트 디렉터리에서 아래 명령어를 실행합니다.
+
+   ```bash
+   python tools/update-doclist.py
+   python tools/j2render.py docs/README-template.md.j2 vars/doclist.json -o docs/README.md
+   ```
+
 3. 커밋하기 전에 `docs/README.md`가 자동으로 갱신되었는지 확인합니다.
 
 ## 문서 파일 생성 규칙
 
 프로젝트 내 문서 파일의 일관성을 유지하기 위해 다음과 같은 파일 이름 생성 규칙을 따릅니다.
 
-### 1. 기본 규칙
+### 기본 규칙
 
 - 모든 파일 이름은 소문자(lowercase)를 사용합니다.
 - 단어 구분은 공백 대신 하이픈(-)을 사용합니다.
 - 파일 확장자는 `.md`를 사용합니다.
 
-### 2. 예시
+### 예시
 
 - `setup-guide.md`
 - `api-reference.md`
 - `contributing-guide.md`
 - `error-handling.md`
 
-### 3. 추가 규칙
+### 추가 규칙
 
 - 파일 이름은 간결하고 의미를 명확하게 전달해야 합니다.
 - 불필요한 특수문자는 사용하지 않습니다.
