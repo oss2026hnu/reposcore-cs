@@ -9,12 +9,18 @@ using Octokit.GraphQL.Model;
 
 namespace RepoScore.Services
 {
+    /// <summary>
+    /// GitHub 이슈 및 Pull Request에 부여된 레이블의 종류를 나타내는 열거형입니다.
+    /// </summary>
     public enum GitHubIssuePrLabel
     {
         None, Bug, Documentation, Duplicate, Enhancement, GoodFirstIssue,
         HelpWanted, Invalid, Pinned, Question, Typo, Wontfix
     }
 
+    /// <summary>
+    /// 이슈가 닫힌 구체적인 사유를 나타내는 열거형입니다.
+    /// </summary>
     public enum IssueClosedStateReason
     {
         None,
@@ -23,58 +29,166 @@ namespace RepoScore.Services
         NotPlanned
     }
 
-    // 선점 댓글 정보를 캐시하기 위한 레코드
+    /// <summary>
+    /// 특정 이슈에 대한 선점 댓글 정보를 저장하고 캐싱하기 위한 클래스입니다.
+    /// </summary>
     public class ClaimComment
     {
+        /// <summary>
+        /// 댓글 작성자의 GitHub 로그인 ID를 가져오거나 설정합니다.
+        /// </summary>
         public string AuthorLogin { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 댓글이 작성된 일시를 가져오거나 설정합니다.
+        /// </summary>
         public DateTimeOffset CreatedAt { get; set; }
     }
 
+    /// <summary>
+    /// GitHub 이슈의 상세 기여 정보를 담는 레코드 클래스입니다.
+    /// </summary>
     public class IssueRecord
     {
+        /// <summary>
+        /// 이슈 번호를 가져오거나 설정합니다.
+        /// </summary>
         public int Number { get; set; }
+
+        /// <summary>
+        /// 이슈의 GitHub 상세 URL 주소를 가져오거나 설정합니다.
+        /// </summary>
         public string Url { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 이슈의 제목을 가져오거나 설정합니다.
+        /// </summary>
         public string Title { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 이슈 작성자의 GitHub 로그인 ID를 가져오거나 설정합니다.
+        /// </summary>
         public string AuthorLogin { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 해당 이슈와 연결된 Pull Request가 존재하는지 여부를 가져오거나 설정합니다.
+        /// </summary>
         public bool HasPr { get; set; }
+
+        /// <summary>
+        /// 이 이슈와 연동된 Pull Request 기록 목록을 가져오거나 설정합니다.
+        /// </summary>
         public List<PRRecord> LinkedPullRequests { get; set; } = new();
+
+        /// <summary>
+        /// 이슈가 종료된 사유를 가져오거나 설정합니다.
+        /// </summary>
         public IssueClosedStateReason ClosedReason { get; set; } = IssueClosedStateReason.None;
+
+        /// <summary>
+        /// 선점 만료까지 남은 잔여 시간을 가져오거나 설정합니다.
+        /// </summary>
         public TimeSpan Remaining { get; set; }
+
+        /// <summary>
+        /// 이슈에 부착된 유효 레이블 목록을 가져오거나 설정합니다.
+        /// </summary>
         public List<GitHubIssuePrLabel> Labels { get; set; } = new();
+
+        /// <summary>
+        /// 이슈가 최종 업데이트된 일시를 가져오거나 설정합니다.
+        /// </summary>
         public DateTimeOffset UpdatedAt { get; set; }
 
+        /// <summary>
+        /// 캐싱된 이슈 선점 댓글 목록을 가져오거나 설정합니다. 값이 null일 경우 JSON 직렬화에서 제외됩니다.
+        /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<ClaimComment>? CachedClaimComments { get; set; } = null;
     }
 
+    /// <summary>
+    /// 저장소 이슈들의 최근 선점 및 미선점 현황 데이터를 관리하는 클래스입니다.
+    /// </summary>
     public class ClaimsData
     {
+        /// <summary>
+        /// 사용자별로 선점한 이슈 목록을 매핑한 딕셔너리를 가져오거나 설정합니다.
+        /// </summary>
         public Dictionary<string, List<IssueRecord>> ClaimedMap { get; set; } = new();
+
+        /// <summary>
+        /// 아직 아무도 선점하지 않은 열린 이슈들의 URL 목록을 가져오거나 설정합니다.
+        /// </summary>
         public List<string> UnclaimedUrls { get; set; } = new();
     }
 
+    /// <summary>
+    /// GitHub Pull Request(PR)의 상세 기여 정보를 담는 레코드 클래스입니다.
+    /// </summary>
     public class PRRecord
     {
+        /// <summary>
+        /// Pull Request 번호를 가져오거나 설정합니다.
+        /// </summary>
         public int Number { get; set; }
+
+        /// <summary>
+        /// Pull Request의 GitHub 상세 URL 주소를 가져오거나 설정합니다.
+        /// </summary>
         public string Url { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Pull Request의 제목을 가져오거나 설정합니다.
+        /// </summary>
         public string Title { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Pull Request 작성자의 GitHub 로그인 ID를 가져오거나 설정합니다.
+        /// </summary>
         public string AuthorLogin { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 해당 Pull Request가 본문에 최종 병합(Merged)되었는지 여부를 가져오거나 설정합니다.
+        /// </summary>
         public bool IsMerged { get; set; } = false;
+
+        /// <summary>
+        /// Pull Request에 부착된 유효 레이블 목록을 가져오거나 설정합니다.
+        /// </summary>
         public List<GitHubIssuePrLabel> Labels { get; set; } = new();
+
+        /// <summary>
+        /// Pull Request가 최종 업데이트된 일시를 가져오거나 설정합니다.
+        /// </summary>
         public DateTimeOffset UpdatedAt { get; set; }
 
+        /// <summary>
+        /// 본문 분석을 통해 연동이 확인된 이슈 번호 목록을 가져오거나 설정합니다. 기본값일 경우 JSON 직렬화에서 제외됩니다.
+        /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public List<int> LinkedIssueNumbers { get; set; } = new();
     }
 
+    /// <summary>
+    /// Pull Request 정보와 해당 PR 본문에서 참조 중인 이슈 번호 목록을 쌍으로 묶어 관리하는 데이터 구조 클래스입니다.
+    /// </summary>
     public class PRWithLinkedIssues
     {
+        /// <summary>
+        /// 대상 Pull Request 기록 객체를 가져오거나 설정합니다.
+        /// </summary>
         public PRRecord Pr { get; set; } = new();
+
+        /// <summary>
+        /// 이 Pull Request와 연결된 이슈 번호 목록을 가져오거나 설정합니다.
+        /// </summary>
         public List<int> LinkedIssueNumbers { get; set; } = new();
     }
 
-    // GitHub REST/GraphQL API를 통해 저장소 데이터를 조회하는 서비스 클래스.
-    // PR 조회, 이슈 조회, 기여자 목록 조회, 이슈 선점 현황 조회 기능을 담당.
+    /// <summary>
+    /// GitHub API를 통해 저장소 데이터를 효율적으로 원격 조회하는 서비스 클래스입니다.
+    /// </summary>
     public class GitHubService
     {
         private readonly Octokit.GraphQL.Connection _graphQLConnection;
@@ -84,6 +198,9 @@ namespace RepoScore.Services
         private static readonly string[] s_defaultClaimKeywords = ["제가 하겠습니다", "진행하겠습니다", "할게요", "I'll take this"];
         private readonly string[] _claimKeywords;
 
+        /// <summary>
+        /// 지정된 저장소 정보 및 인증 토큰을 사용하여 <see cref="GitHubService"/> 클래스의 새 인스턴스를 초기화합니다.
+        /// </summary>
         public GitHubService(string owner, string repo, string token, string[]? keywords = null)
         {
             _owner = owner;
@@ -96,8 +213,9 @@ namespace RepoScore.Services
                 new Octokit.GraphQL.ProductHeaderValue("reposcore-cs"), token);
         }
 
-        // 저장소의 머지된 전체 PR 목록을 GraphQL로 비동기 조회.
-        // since가 지정된 경우 해당 시각 이후 업데이트된 PR만 가져옴.
+        /// <summary>
+        /// 저장소 내에서 메인 브랜치에 병합(Merged)이 완료된 전체 Pull Request 목록을 GraphQL로 비동기 조회합니다.
+        /// </summary>
         public async System.Threading.Tasks.Task<List<PRRecord>> GetPullRequestsAsync(DateTimeOffset? since = null)
         {
             string searchString = $"repo:{_owner}/{_repo} is:pr is:merged";
@@ -153,53 +271,62 @@ namespace RepoScore.Services
             return prRecords;
         }
 
-        // 저장소의 전체 이슈 목록을 GraphQL로 비동기 조회.
-        // "not planned", "duplicate" 사유로 닫힌 이슈는 제외.
-        // since가 지정된 경우 해당 시각 이후 업데이트된 이슈만 가져옴.
-        // repository 필드를 search와 함께 요청하여 존재하지 않는 저장소면 예외 발생.
-        public async System.Threading.Tasks.Task<List<IssueRecord>> GetIssuesAsync(DateTimeOffset? since = null)
+        /// <summary>
+        /// GraphQL 멀티 쿼리(Alias)를 활용하여 단 1번의 호출로 전수 통계용 이슈 리스트와 선점 계산용 열린 이슈 리스트를 최적화 수집합니다.
+        /// </summary>
+        /// <param name="since">지정된 경우, 해당 일시 이후에 최종 업데이트된 데이터만 필터링합니다.</param>
+        /// <returns>통합 이슈 리스트와 열린 이슈 리스트의 튜플 구조</returns>
+        public async System.Threading.Tasks.Task<(List<IssueRecord> AllIssues, List<IssueRecord> OpenIssues)> GetIssuesCombinedAsync(DateTimeOffset? since = null)
         {
+            // 오픈 이슈 쿼리(Alias openIssues)에는 댓글(comments)을 요청하고,
+            // 클로즈 이슈 쿼리(Alias closedIssues)에는 댓글을 원천 배제하여 교수님의 지적 사항을 해결했습니다.
             const string rawGraphQl = @"
-            query($owner: String!, $repoName: String!, $searchQuery: String!, $after: String) {
-                repository(owner: $owner, name: $repoName) {
-                    id
-                }
-                search(query: $searchQuery, type: ISSUE, first: 100, after: $after) {
-                    pageInfo {
-                        hasNextPage
-                        endCursor
-                    }
+            query($owner: String!, $repoName: String!, $openQuery: String!, $closedQuery: String!, $openAfter: String, $closedAfter: String) {
+                repository(owner: $owner, name: $repoName) { id }
+                openIssues: search(query: $openQuery, type: ISSUE, first: 100, after: $openAfter) {
+                    pageInfo { hasNextPage endCursor }
                     nodes {
                         ... on Issue {
-                            number
-                            title
-                            url
-                            stateReason
-                            updatedAt
-                            author {
-                                login
+                            number title url stateReason updatedAt
+                            author { login }
+                            labels(first: 10) { nodes { name } }
+                            comments(first: 30) {
+                                nodes { body createdAt author { login } }
                             }
-                            labels(first: 10) {
-                                nodes {
-                                    name
-                                }
-                            }
+                        }
+                    }
+                }
+                closedIssues: search(query: $closedQuery, type: ISSUE, first: 100, after: $closedAfter) {
+                    pageInfo { hasNextPage endCursor }
+                    nodes {
+                        ... on Issue {
+                            number title url stateReason updatedAt
+                            author { login }
+                            labels(first: 10) { nodes { name } }
                         }
                     }
                 }
             }";
 
-            string searchString = $"repo:{_owner}/{_repo} is:issue -reason:\"not planned\" -reason:\"duplicate\"";
+            string baseSearch = $"repo:{_owner}/{_repo} is:issue -reason:\"not planned\" -reason:\"duplicate\"";
             if (since.HasValue)
             {
-                searchString += $" updated:>={since.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}";
+                baseSearch += $" updated:>={since.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}";
             }
 
-            var issueRecords = new List<IssueRecord>();
-            string? cursor = null;
-            bool hasNextPage = true;
+            string openQueryStr = $"{baseSearch} is:open";
+            string closedQueryStr = $"{baseSearch} is:closed";
 
-            while (hasNextPage)
+            var allIssues = new List<IssueRecord>();
+            var openIssues = new List<IssueRecord>();
+
+            string? openCursor = null;
+            string? closedCursor = null;
+            bool openHasNext = true;
+            bool closedHasNext = true;
+            var now = DateTimeOffset.UtcNow;
+
+            while (openHasNext || closedHasNext)
             {
                 var requestPayload = JsonSerializer.Serialize(new
                 {
@@ -208,81 +335,123 @@ namespace RepoScore.Services
                     {
                         ["owner"] = _owner,
                         ["repoName"] = _repo,
-                        ["searchQuery"] = searchString,
-                        ["after"] = cursor
+                        ["openQuery"] = openQueryStr,
+                        ["closedQuery"] = closedQueryStr,
+                        ["openAfter"] = openHasNext ? openCursor : null,
+                        ["closedAfter"] = closedHasNext ? closedCursor : null
                     }
                 });
 
                 var rawResponse = await _graphQLConnection.Run(requestPayload);
                 using var document = JsonDocument.Parse(rawResponse);
 
-                // errors 필드가 있으면 저장소 없음 등의 오류 → 예외로 전달
                 if (document.RootElement.TryGetProperty("errors", out var errorsElement))
                 {
                     var firstError = errorsElement.EnumerateArray().FirstOrDefault();
-                    var message = firstError.TryGetProperty("message", out var msgEl)
-                        ? msgEl.GetString() ?? "알 수 없는 오류"
-                        : "알 수 없는 오류";
-                    throw new InvalidOperationException(message);
+                    throw new InvalidOperationException(firstError.TryGetProperty("message", out var msgEl) ? msgEl.GetString() : "GraphQL 쿼리 에러");
                 }
 
-                if (!document.RootElement.TryGetProperty("data", out var dataElement) ||
-                    !dataElement.TryGetProperty("search", out var searchElement))
-                {
-                    break;
-                }
+                if (!document.RootElement.TryGetProperty("data", out var dataElement)) break;
 
-                var pageInfo = searchElement.GetProperty("pageInfo");
-                hasNextPage = pageInfo.GetProperty("hasNextPage").GetBoolean();
-                cursor = pageInfo.GetProperty("endCursor").GetString();
-
-                if (searchElement.TryGetProperty("nodes", out var nodesElement) && nodesElement.ValueKind == JsonValueKind.Array)
+                // 1. 오픈 이슈 파싱 (댓글 포함 채우기)
+                if (openHasNext && dataElement.TryGetProperty("openIssues", out var openNode))
                 {
-                    foreach (var node in nodesElement.EnumerateArray())
+                    var pageInfo = openNode.GetProperty("pageInfo");
+                    openHasNext = pageInfo.GetProperty("hasNextPage").GetBoolean();
+                    openCursor = pageInfo.GetProperty("endCursor").GetString();
+
+                    foreach (var node in openNode.GetProperty("nodes").EnumerateArray())
                     {
-                        if (node.ValueKind != JsonValueKind.Object) continue;
-
-                        var labelNames = new List<string>();
-                        if (node.TryGetProperty("labels", out var labelsElement) &&
-                            labelsElement.TryGetProperty("nodes", out var labelNodesElement))
-                        {
-                            foreach (var labelNode in labelNodesElement.EnumerateArray())
-                            {
-                                if (labelNode.TryGetProperty("name", out var labelNameElement))
-                                    labelNames.Add(labelNameElement.GetString() ?? "");
-                            }
-                        }
-
-                        var updatedAt = node.TryGetProperty("updatedAt", out var updatedElement)
-                            ? DateTimeOffset.Parse(updatedElement.GetString()!) : DateTimeOffset.MinValue;
-
-                        string authorLogin = "";
-                        if (node.TryGetProperty("author", out var authorElement) && authorElement.ValueKind == JsonValueKind.Object)
-                        {
-                            if (authorElement.TryGetProperty("login", out var loginElement))
-                            {
-                                authorLogin = loginElement.GetString() ?? "";
-                            }
-                        }
-
-                        issueRecords.Add(new IssueRecord
-                        {
-                            Number = node.TryGetProperty("number", out var numEl) ? numEl.GetInt32() : 0,
-                            Title = node.TryGetProperty("title", out var titEl) ? titEl.GetString() ?? "" : "",
-                            Url = node.TryGetProperty("url", out var urlEl) ? urlEl.GetString() ?? "" : "",
-                            AuthorLogin = authorLogin,
-                            ClosedReason = ParseIssueClosedStateReason(node),
-                            Labels = labelNames.Select(ParseGitHubLabel).Where(l => l != GitHubIssuePrLabel.None).ToList(),
-                            UpdatedAt = updatedAt
-                        });
+                        var record = ParseSingleIssueJson(node, now, includeComments: true);
+                        openIssues.Add(record);
+                        allIssues.Add(record);
                     }
+                }
+                else { openHasNext = false; }
+
+                // 2. 닫힌 이슈 파싱 (댓글 제외하여 응답 최적화)
+                if (closedHasNext && dataElement.TryGetProperty("closedIssues", out var closedNode))
+                {
+                    var pageInfo = closedNode.GetProperty("pageInfo");
+                    closedHasNext = pageInfo.GetProperty("hasNextPage").GetBoolean();
+                    closedCursor = pageInfo.GetProperty("endCursor").GetString();
+
+                    foreach (var node in closedNode.GetProperty("nodes").EnumerateArray())
+                    {
+                        var record = ParseSingleIssueJson(node, now, includeComments: false);
+                        allIssues.Add(record);
+                    }
+                }
+                else { closedHasNext = false; }
+            }
+
+            return (allIssues, openIssues);
+        }
+
+        /// <summary>
+        /// 공통적인 단일 이슈 JSON 데이터를 시스템 레코드 구조 객체로 변환해 주는 공용 내부 헬퍼 메서드입니다.
+        /// </summary>
+        private IssueRecord ParseSingleIssueJson(JsonElement node, DateTimeOffset now, bool includeComments)
+        {
+            var labelNames = new List<string>();
+            if (node.TryGetProperty("labels", out var labelsElement) && labelsElement.TryGetProperty("nodes", out var nodes))
+            {
+                foreach (var labelNode in nodes.EnumerateArray())
+                {
+                    if (labelNode.TryGetProperty("name", out var nameEl))
+                        labelNames.Add(nameEl.GetString() ?? "");
                 }
             }
 
-            return issueRecords;
+            string authorLogin = "";
+            if (node.TryGetProperty("author", out var authEl) && authEl.ValueKind == JsonValueKind.Object)
+            {
+                authorLogin = authEl.TryGetProperty("login", out var logEl) ? logEl.GetString() ?? "" : "";
+            }
+
+            var record = new IssueRecord
+            {
+                Number = node.TryGetProperty("number", out var num) ? num.GetInt32() : 0,
+                Title = node.TryGetProperty("title", out var tit) ? tit.GetString() ?? "" : "",
+                Url = node.TryGetProperty("url", out var url) ? url.GetString() ?? "" : "",
+                AuthorLogin = authorLogin,
+                ClosedReason = ParseIssueClosedStateReason(node),
+                Labels = labelNames.Select(ParseGitHubLabel).Where(l => l != GitHubIssuePrLabel.None).ToList(),
+                UpdatedAt = node.TryGetProperty("updatedAt", out var up) ? DateTimeOffset.Parse(up.GetString()!) : DateTimeOffset.MinValue
+            };
+
+            if (includeComments && node.TryGetProperty("comments", out var commEl) && commEl.TryGetProperty("nodes", out var commNodes))
+            {
+                record.CachedClaimComments = commNodes.EnumerateArray()
+                    .Where(c => {
+                        if (!c.TryGetProperty("body", out var b) || string.IsNullOrEmpty(b.GetString())) return false;
+                        var createdAtStr = c.TryGetProperty("createdAt", out var cr) ? cr.GetString() : null;
+                        if (createdAtStr == null) return false;
+                        return (now - DateTimeOffset.Parse(createdAtStr)).TotalHours <= 48
+                            && _claimKeywords.Any(k => b.GetString()!.Contains(k, StringComparison.OrdinalIgnoreCase));
+                    })
+                    .Select(c => new ClaimComment
+                    {
+                        AuthorLogin = c.TryGetProperty("author", out var ca) && ca.ValueKind == JsonValueKind.Object && ca.TryGetProperty("login", out var cl) ? cl.GetString() ?? "unknown" : "unknown",
+                        CreatedAt = DateTimeOffset.Parse(c.GetProperty("createdAt").GetString()!)
+                    }).ToList();
+            }
+
+            return record;
         }
 
-        // 저장소의 열린 이슈를 대상으로 최근 48시간 내 선점 현황을 비동기 조회.
+        /// <summary>
+        /// 기존 레거시 GetIssuesAsync 메서드는 전수 조사가 가능한 새 통합 API를 바라보도록 우회 구현합니다.
+        /// </summary>
+        public async System.Threading.Tasks.Task<List<IssueRecord>> GetIssuesAsync(DateTimeOffset? since = null)
+        {
+            var (allIssues, _) = await GetIssuesCombinedAsync(since);
+            return allIssues;
+        }
+
+        /// <summary>
+        /// 저장소의 열린 이슈를 대상으로 최근 48시간 내 선점 현황을 비동기 조회합니다. (네트워크 중복 호출 최적화 완료)
+        /// </summary>
         public async System.Threading.Tasks.Task<(ClaimsData claimsData, List<IssueRecord> updatedOpenIssues, List<PRRecord> updatedOpenPrs)>
             GetRecentClaimsDataAsync(
                 List<IssueRecord>? cachedOpenIssues = null,
@@ -318,8 +487,8 @@ namespace RepoScore.Services
                 }
             }
 
-            var (freshIssues, closedIssueNumbers) = await FetchOpenIssuesWithClaimCommentsAsync(
-                isFullRefresh ? null : since);
+            // [핵심 변경점]: 여기서 중복 쿼리를 날리던 내부 프라이빗 메서드 호출을 제거하고, 새로 구현한 고속 통합 배정 메서드를 호출합니다.
+            var (allIssues, freshIssues) = await GetIssuesCombinedAsync(isFullRefresh ? null : since);
 
             List<IssueRecord> updatedOpenIssues;
             if (isFullRefresh || cachedOpenIssues == null)
@@ -331,8 +500,12 @@ namespace RepoScore.Services
                 var openIssueDict = cachedOpenIssues.ToDictionary(i => i.Number);
                 foreach (var freshIssue in freshIssues)
                     openIssueDict[freshIssue.Number] = freshIssue;
+
+                // 닫힌 이슈 번호 추적 처리
+                var closedIssueNumbers = allIssues.Where(i => i.ClosedReason != IssueClosedStateReason.None).Select(i => i.Number);
                 foreach (var closedNumber in closedIssueNumbers)
                     openIssueDict.Remove(closedNumber);
+
                 updatedOpenIssues = openIssueDict.Values.ToList();
             }
 
@@ -379,149 +552,9 @@ namespace RepoScore.Services
             return (claimsData, updatedOpenIssues, updatedOpenPrs);
         }
 
-        // 열린 이슈와 선점 댓글을 함께 비동기 조회.
-        private async System.Threading.Tasks.Task<(List<IssueRecord> openIssues, HashSet<int> closedIssueNumbers)>
-            FetchOpenIssuesWithClaimCommentsAsync(DateTimeOffset? since = null)
-        {
-            var openIssues = new List<IssueRecord>();
-            var closedIssueNumbers = new HashSet<int>();
-            string? cursor = null;
-            bool hasNextPage = true;
-            var now = DateTimeOffset.UtcNow;
-
-            var updatedIssueNumbers = new HashSet<int>();
-            if (since.HasValue)
-            {
-                const string allIssuesQuery = @"
-                query($searchQuery: String!, $after: String) {
-                    search(query: $searchQuery, type: ISSUE, first: 100, after: $after) {
-                        pageInfo { hasNextPage endCursor }
-                        nodes {
-                            ... on Issue { number }
-                        }
-                    }
-                }";
-
-                string searchString = $"repo:{_owner}/{_repo} is:issue updated:>={since.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}";
-                string? searchCursor = null;
-                bool searchHasNextPage = true;
-
-                while (searchHasNextPage)
-                {
-                    var payload = JsonSerializer.Serialize(new
-                    {
-                        query = allIssuesQuery,
-                        variables = new Dictionary<string, object>
-                        {
-                            ["searchQuery"] = searchString,
-                            ["after"] = searchCursor!
-                        }
-                    });
-
-                    var rawResponse = await _graphQLConnection.Run(payload);
-                    using var doc = JsonDocument.Parse(rawResponse);
-
-                    if (!doc.RootElement.TryGetProperty("data", out var dataEl) ||
-                        !dataEl.TryGetProperty("search", out var searchEl))
-                        break;
-
-                    var pageInfo = searchEl.GetProperty("pageInfo");
-                    searchHasNextPage = pageInfo.GetProperty("hasNextPage").GetBoolean();
-                    searchCursor = pageInfo.GetProperty("endCursor").GetString();
-
-                    if (searchEl.TryGetProperty("nodes", out var nodes) && nodes.ValueKind == JsonValueKind.Array)
-                    {
-                        foreach (var node in nodes.EnumerateArray())
-                        {
-                            if (node.TryGetProperty("number", out var numEl))
-                                updatedIssueNumbers.Add(numEl.GetInt32());
-                        }
-                    }
-                }
-            }
-
-            while (hasNextPage)
-            {
-                var query = new Octokit.GraphQL.Query()
-                    .Repository(_repo, _owner)
-                    .Issues(
-                        first: 100,
-                        after: cursor,
-                        states: new[] { IssueState.Open },
-                        orderBy: new IssueOrder { Field = IssueOrderField.UpdatedAt, Direction = OrderDirection.Desc })
-                    .Select(s => new
-                    {
-                        s.PageInfo.HasNextPage,
-                        s.PageInfo.EndCursor,
-                        Items = s.Nodes.Select(issue => new
-                        {
-                            issue.Number,
-                            issue.Url,
-                            issue.UpdatedAt,
-                            Labels = issue.Labels(10, null, null, null, null).Nodes.Select(l => l.Name).ToList(),
-                            Comments = issue.Comments(10, null, null, null, null).Nodes.Select(c => new
-                            {
-                                c.Body,
-                                c.CreatedAt,
-                                AuthorLogin = c.Author.Login
-                            }).ToList()
-                        }).ToList()
-                    });
-
-                var result = await _graphQLConnection.Run(query);
-
-                foreach (var issue in result.Items)
-                {
-                    if (since.HasValue && issue.UpdatedAt < since.Value)
-                    {
-                        hasNextPage = false;
-                        break;
-                    }
-
-                    var issueLabels = issue.Labels
-                        .Select(ParseGitHubLabel)
-                        .Where(l => l != GitHubIssuePrLabel.None)
-                        .ToList();
-
-                    var claimComments = issue.Comments
-                        .Where(c => (now - c.CreatedAt).TotalHours <= 48
-                            && _claimKeywords.Any(k => c.Body.Contains(k, StringComparison.OrdinalIgnoreCase)))
-                        .Select(c => new ClaimComment
-                        {
-                            AuthorLogin = c.AuthorLogin ?? "unknown",
-                            CreatedAt = c.CreatedAt
-                        })
-                        .ToList();
-
-                    openIssues.Add(new IssueRecord
-                    {
-                        Number = issue.Number,
-                        Url = issue.Url,
-                        Labels = issueLabels,
-                        UpdatedAt = issue.UpdatedAt,
-                        CachedClaimComments = claimComments
-                    });
-                }
-
-                if (!hasNextPage) break;
-                hasNextPage = result.HasNextPage;
-                cursor = result.EndCursor;
-            }
-
-            if (since.HasValue)
-            {
-                var openNumbers = openIssues.Select(i => i.Number).ToHashSet();
-                foreach (var num in updatedIssueNumbers)
-                {
-                    if (!openNumbers.Contains(num))
-                        closedIssueNumbers.Add(num);
-                }
-            }
-
-            return (openIssues, closedIssueNumbers);
-        }
-
-        // since 이후 업데이트된 열린 PR과 본문에서 파싱한 연결 이슈 번호 목록을 비동기 반환.
+        /// <summary>
+        /// since 이후 업데이트된 열린 PR과 본문에서 파싱한 연결 이슈 번호 목록을 비동기 반환합니다.
+        /// </summary>
         public async System.Threading.Tasks.Task<List<PRWithLinkedIssues>> GetOpenPullRequestsWithLinkedIssuesAsync(DateTimeOffset? since = null)
         {
             var prsWithIssues = new List<PRWithLinkedIssues>();
